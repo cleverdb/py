@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>拼音学习 · 音频资源</title>
+<style>
+  :root {
+    --bg: #f6f7f9;
+    --card: #ffffff;
+    --line: #e6e8ec;
+    --text: #1f2329;
+    --muted: #8a9099;
+    --accent: #ff8f3f;
+    --accent-soft: #fff3e9;
+    --ok: #16a34a;
+    --err: #dc2626;
+    --shadow: 0 2px 12px rgba(31, 35, 41, .06);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 14px/1.6 -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Helvetica Neue", sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 960px; margin: 0 auto; padding: 32px 20px 140px; }
+  header h1 { margin: 0 0 6px; font-size: 24px; letter-spacing: .5px; }
+  header .sub { color: var(--muted); margin: 0 0 4px; }
+  header .note {
+    display: inline-block; margin-top: 12px; padding: 8px 14px;
+    background: var(--accent-soft); color: #b35a12; border-radius: 10px; font-size: 13px;
+  }
+  .stats { display: flex; flex-wrap: wrap; gap: 12px; margin: 24px 0 20px; }
+  .stat {
+    flex: 1 1 150px; background: var(--card); border: 1px solid var(--line);
+    border-radius: 14px; padding: 16px 18px; box-shadow: var(--shadow);
+  }
+  .stat b { display: block; font-size: 26px; line-height: 1.2; font-weight: 650; }
+  .stat span { color: var(--muted); font-size: 12px; }
+  .panel {
+    background: var(--card); border: 1px solid var(--line);
+    border-radius: 14px; box-shadow: var(--shadow); padding: 18px; margin-bottom: 18px;
+  }
+  .toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  .search {
+    flex: 1 1 260px; min-width: 200px; padding: 10px 14px; font-size: 14px;
+    border: 1px solid var(--line); border-radius: 10px; outline: none; background: #fafbfc;
+  }
+  .search:focus { border-color: var(--accent); background: #fff; }
+  button {
+    font: inherit; cursor: pointer; border: 1px solid var(--line); background: #fff;
+    color: var(--text); padding: 9px 15px; border-radius: 10px; transition: .15s;
+  }
+  button:hover { border-color: var(--accent); color: #b35a12; }
+  button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  button.primary:hover { background: #f07f2c; color: #fff; }
+  button:disabled { opacity: .55; cursor: default; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+  .chip {
+    padding: 6px 13px; border-radius: 999px; font-size: 13px;
+    border: 1px solid var(--line); background: #fff; cursor: pointer; user-select: none;
+  }
+  .chip:hover { border-color: var(--accent); }
+  .chip.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .chip i { font-style: normal; opacity: .7; margin-left: 5px; font-size: 11px; }
+  .checkbar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 4px; }
+  .progress { flex: 1 1 180px; height: 6px; background: var(--line); border-radius: 99px; overflow: hidden; }
+  .progress > div { height: 100%; width: 0; background: var(--accent); transition: width .2s; }
+  .checkmsg { color: var(--muted); font-size: 13px; min-width: 160px; }
+  .checkmsg .ok { color: var(--ok); font-weight: 600; }
+  .checkmsg .err { color: var(--err); font-weight: 600; }
+  details.group {
+    background: var(--card); border: 1px solid var(--line);
+    border-radius: 14px; box-shadow: var(--shadow); margin-bottom: 12px; overflow: hidden;
+  }
+  details.group > summary {
+    list-style: none; cursor: pointer; padding: 14px 18px; display: flex;
+    align-items: center; gap: 10px; font-weight: 600;
+  }
+  details.group > summary::-webkit-details-marker { display: none; }
+  details.group > summary .arrow { color: var(--muted); font-size: 12px; transition: transform .15s; }
+  details.group[open] > summary .arrow { transform: rotate(90deg); }
+  details.group > summary .count { margin-left: auto; color: var(--muted); font-weight: 400; font-size: 12px; }
+  .rows { border-top: 1px solid var(--line); max-height: 420px; overflow-y: auto; }
+  .row {
+    display: flex; align-items: center; gap: 10px; padding: 8px 18px;
+    border-bottom: 1px solid #f1f2f4; font-size: 13px;
+  }
+  .row:last-child { border-bottom: 0; }
+  .row:hover { background: #fafbfc; }
+  .row .play {
+    flex: 0 0 auto; width: 30px; height: 30px; padding: 0; border-radius: 50%;
+    border: 1px solid var(--line); background: #fff; color: var(--accent); font-size: 12px; line-height: 1;
+  }
+  .row .play:hover { background: var(--accent-soft); }
+  .row .name { flex: 1 1 auto; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; word-break: break-all; }
+  .row .state { flex: 0 0 auto; font-size: 11px; color: var(--muted); min-width: 26px; text-align: right; }
+  .row .state.ok { color: var(--ok); }
+  .row .state.err { color: var(--err); }
+  .row .copy { flex: 0 0 auto; padding: 4px 10px; font-size: 12px; }
+  .empty { padding: 30px; text-align: center; color: var(--muted); }
+  .player {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 20;
+    background: rgba(255,255,255,.96); backdrop-filter: blur(10px);
+    border-top: 1px solid var(--line); box-shadow: 0 -4px 20px rgba(31,35,41,.08);
+    padding: 12px 20px; display: none;
+  }
+  .player .inner { max-width: 960px; margin: 0 auto; display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+  .player .now { flex: 1 1 200px; font-size: 13px; }
+  .player .now b { display: block; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-weight: 600; }
+  .player .now span { color: var(--muted); font-size: 12px; word-break: break-all; }
+  .player audio { flex: 1 1 320px; height: 36px; }
+  footer { color: var(--muted); font-size: 12px; line-height: 1.9; }
+  footer code {
+    background: #eef0f3; padding: 1px 6px; border-radius: 5px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px;
+  }
+  @media (max-width: 600px) {
+    .wrap { padding: 20px 14px 160px; }
+    header h1 { font-size: 20px; }
+    .stat b { font-size: 22px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>拼音学习 · 音频资源</h1>
+    <p class="sub">一年级拼音学习微信小程序的音频托管目录 · GitHub Pages</p>
+    <p class="note">本页为音频托管自检页（mock），用于核对全部音频是否可访问、试听发音，非小程序产品界面。</p>
+  </header>
+
+  <section class="stats" id="stats"></section>
+
+  <section class="panel">
+    <div class="toolbar">
+      <input class="search" id="search" type="search" placeholder="搜索文件名，如 ba4 / cd_361 / pinyin/b" autocomplete="off">
+      <button class="primary" id="checkBtn">一键自检当前列表</button>
+      <button id="copyAllBtn">复制全部直链</button>
+    </div>
+    <div class="chips" id="chips"></div>
+    <div class="checkbar" id="checkbar" style="display:none; margin-top:14px;">
+      <div class="progress"><div id="progressBar"></div></div>
+      <div class="checkmsg" id="checkMsg">准备中…</div>
+    </div>
+  </section>
+
+  <section id="groups"></section>
+
+  <footer>
+    <p><b>小程序接入</b>：把 <code>AUDIO_BASE</code>（<code>app/utils/audio.js</code>）与 <code>SPELL_AUDIO_BASE</code>（<code>app/pages/quiz/quiz.js</code>）指向本 Pages 目录，并在微信公众平台把 <code>https://cleverdb.github.io</code> 加入 <b>downloadFile 合法域名</b>。注意 GitHub Pages 域名在国内通常未 ICP 备案，后台可能拒绝保存；若被拒需绑定自有已备案域名（CNAME）。</p>
+    <p>文件名规则：<code>spell-audio/</code> 为去调音节 + 调号（<code>bà→ba4.m4a</code>，ü 写作 v）；<code>audio-host/quiz/</code> 以题目 id 命名，其余按拼音/示例词/声调/音效/引导分类。清单为构建时快照，共 <span id="footCount">—</span> 条。</p>
+  </footer>
+</div>
+
+<div class="player" id="player">
+  <div class="inner">
+    <div class="now"><b id="nowName">—</b><span id="nowUrl"></span></div>
+    <audio id="audio" controls preload="none"></audio>
+    <button id="closeBtn">关闭</button>
+  </div>
+</div>
+
+<script>
+/* 构建时注入：全部音频相对路径（相对本页所在的 Pages 根目录） */
+var AUDIO_FILES = ["audio-host/fx/praise.m4a","audio-host/fx/tryagain.m4a","audio-host/guide/tap-to-start.m4a","audio-host/pinyin/a.m4a","audio-host/pinyin/a1.m4a","audio-host/pinyin/a2.m4a","audio-host/pinyin/a3.m4a","audio-host/pinyin/a4.m4a","audio-host/pinyin/ai.m4a","audio-host/pinyin/an.m4a","audio-host/pinyin/ang.m4a","audio-host/pinyin/ao.m4a","audio-host/pinyin/b.m4a","audio-host/pinyin/ba.m4a","audio-host/pinyin/c.m4a","audio-host/pinyin/ch.m4a","audio-host/pinyin/chi.m4a","audio-host/pinyin/chuan.m4a","audio-host/pinyin/ci.m4a","audio-host/pinyin/d.m4a","audio-host/pinyin/e.m4a","audio-host/pinyin/ei.m4a","audio-host/pinyin/en.m4a","audio-host/pinyin/eng.m4a","audio-host/pinyin/er.m4a","audio-host/pinyin/f.m4a","audio-host/pinyin/g.m4a","audio-host/pinyin/gua.m4a","audio-host/pinyin/h.m4a","audio-host/pinyin/hao.m4a","audio-host/pinyin/huo.m4a","audio-host/pinyin/i.m4a","audio-host/pinyin/ie.m4a","audio-host/pinyin/in.m4a","audio-host/pinyin/ing.m4a","audio-host/pinyin/iu.m4a","audio-host/pinyin/j.m4a","audio-host/pinyin/ju.m4a","audio-host/pinyin/k.m4a","audio-host/pinyin/l.m4a","audio-host/pinyin/m.m4a","audio-host/pinyin/ma.m4a","audio-host/pinyin/n.m4a","audio-host/pinyin/niao.m4a","audio-host/pinyin/o.m4a","audio-host/pinyin/ong.m4a","audio-host/pinyin/ou.m4a","audio-host/pinyin/p.m4a","audio-host/pinyin/q.m4a","audio-host/pinyin/qu.m4a","audio-host/pinyin/quan.m4a","audio-host/pinyin/r.m4a","audio-host/pinyin/ri.m4a","audio-host/pinyin/s.m4a","audio-host/pinyin/sh.m4a","audio-host/pinyin/shi.m4a","audio-host/pinyin/shui.m4a","audio-host/pinyin/si.m4a","audio-host/pinyin/t.m4a","audio-host/pinyin/u.m4a","audio-host/pinyin/ui.m4a","audio-host/pinyin/un.m4a","audio-host/pinyin/v.m4a","audio-host/pinyin/ve.m4a","audio-host/pinyin/vn.m4a","audio-host/pinyin/w.m4a","audio-host/pinyin/wu.m4a","audio-host/pinyin/x.m4a","audio-host/pinyin/xu.m4a","audio-host/pinyin/xue.m4a","audio-host/pinyin/y.m4a","audio-host/pinyin/ye.m4a","audio-host/pinyin/yi.m4a","audio-host/pinyin/yin.m4a","audio-host/pinyin/ying.m4a","audio-host/pinyin/yu.m4a","audio-host/pinyin/yuan.m4a","audio-host/pinyin/yue.m4a","audio-host/pinyin/yun.m4a","audio-host/pinyin/z.m4a","audio-host/pinyin/zh.m4a","audio-host/pinyin/zhi.m4a","audio-host/pinyin/zi.m4a","audio-host/quiz/cd_351.m4a","audio-host/quiz/cd_353.m4a","audio-host/quiz/cd_355.m4a","audio-host/quiz/cd_357.m4a","audio-host/quiz/cd_359.m4a","audio-host/quiz/cd_361.m4a","audio-host/quiz/cd_363.m4a","audio-host/quiz/cd_365.m4a","audio-host/quiz/cd_367.m4a","audio-host/quiz/cd_369.m4a","audio-host/quiz/cd_371.m4a","audio-host/quiz/cd_373.m4a","audio-host/quiz/cd_375.m4a","audio-host/quiz/cd_377.m4a","audio-host/quiz/cd_379.m4a","audio-host/quiz/cd_381.m4a","audio-host/quiz/cd_383.m4a","audio-host/quiz/cd_385.m4a","audio-host/quiz/cd_387.m4a","audio-host/quiz/cd_389.m4a","audio-host/quiz/cr_282.m4a","audio-host/quiz/cr_284.m4a","audio-host/quiz/cr_286.m4a","audio-host/quiz/cr_288.m4a","audio-host/quiz/cr_290.m4a","audio-host/quiz/cr_292.m4a","audio-host/quiz/cr_294.m4a","audio-host/quiz/cr_296.m4a","audio-host/quiz/cr_298.m4a","audio-host/quiz/cr_300.m4a","audio-host/quiz/cr_302.m4a","audio-host/quiz/cr_304.m4a","audio-host/quiz/cr_306.m4a","audio-host/quiz/cr_308.m4a","audio-host/quiz/cr_310.m4a","audio-host/quiz/cr_312.m4a","audio-host/quiz/cr_314.m4a","audio-host/quiz/cr_316.m4a","audio-host/quiz/cr_318.m4a","audio-host/quiz/cr_320.m4a","audio-host/quiz/cr_322.m4a","audio-host/quiz/cr_324.m4a","audio-host/quiz/cr_326.m4a","audio-host/quiz/cr_328.m4a","audio-host/quiz/cr_330.m4a","audio-host/quiz/cr_332.m4a","audio-host/quiz/cr_334.m4a","audio-host/quiz/cr_336.m4a","audio-host/quiz/cr_338.m4a","audio-host/quiz/cr_340.m4a","audio-host/quiz/cr_342.m4a","audio-host/quiz/cr_344.m4a","audio-host/quiz/cr_346.m4a","audio-host/quiz/cr_348.m4a","audio-host/quiz/cs_283.m4a","audio-host/quiz/cs_285.m4a","audio-host/quiz/cs_287.m4a","audio-host/quiz/cs_289.m4a","audio-host/quiz/cs_291.m4a","audio-host/quiz/cs_293.m4a","audio-host/quiz/cs_295.m4a","audio-host/quiz/cs_297.m4a","audio-host/quiz/cs_299.m4a","audio-host/quiz/cs_301.m4a","audio-host/quiz/cs_303.m4a","audio-host/quiz/cs_305.m4a","audio-host/quiz/cs_307.m4a","audio-host/quiz/cs_309.m4a","audio-host/quiz/cs_311.m4a","audio-host/quiz/cs_313.m4a","audio-host/quiz/cs_315.m4a","audio-host/quiz/cs_317.m4a","audio-host/quiz/cs_319.m4a","audio-host/quiz/cs_321.m4a","audio-host/quiz/cs_323.m4a","audio-host/quiz/cs_325.m4a","audio-host/quiz/cs_327.m4a","audio-host/quiz/cs_329.m4a","audio-host/quiz/cs_331.m4a","audio-host/quiz/cs_333.m4a","audio-host/quiz/cs_335.m4a","audio-host/quiz/cs_337.m4a","audio-host/quiz/cs_339.m4a","audio-host/quiz/cs_341.m4a","audio-host/quiz/cs_343.m4a","audio-host/quiz/cs_345.m4a","audio-host/quiz/cs_347.m4a","audio-host/quiz/cs_349.m4a","audio-host/quiz/cw_350.m4a","audio-host/quiz/cw_352.m4a","audio-host/quiz/cw_354.m4a","audio-host/quiz/cw_356.m4a","audio-host/quiz/cw_358.m4a","audio-host/quiz/cw_360.m4a","audio-host/quiz/cw_362.m4a","audio-host/quiz/cw_364.m4a","audio-host/quiz/cw_366.m4a","audio-host/quiz/cw_368.m4a","audio-host/quiz/cw_370.m4a","audio-host/quiz/cw_372.m4a","audio-host/quiz/cw_374.m4a","audio-host/quiz/cw_376.m4a","audio-host/quiz/cw_378.m4a","audio-host/quiz/cw_380.m4a","audio-host/quiz/cw_382.m4a","audio-host/quiz/cw_384.m4a","audio-host/quiz/cw_386.m4a","audio-host/quiz/cw_388.m4a","audio-host/quiz/ex_262.m4a","audio-host/quiz/ex_263.m4a","audio-host/quiz/ex_264.m4a","audio-host/quiz/ex_265.m4a","audio-host/quiz/ex_266.m4a","audio-host/quiz/ex_267.m4a","audio-host/quiz/ex_268.m4a","audio-host/quiz/ex_269.m4a","audio-host/quiz/ex_270.m4a","audio-host/quiz/ex_271.m4a","audio-host/quiz/ex_272.m4a","audio-host/quiz/ex_273.m4a","audio-host/quiz/ex_274.m4a","audio-host/quiz/ex_275.m4a","audio-host/quiz/ex_276.m4a","audio-host/quiz/ex_277.m4a","audio-host/quiz/ex_278.m4a","audio-host/quiz/ex_279.m4a","audio-host/quiz/ex_280.m4a","audio-host/quiz/ex_281.m4a","audio-host/quiz/fs_101.m4a","audio-host/quiz/fs_104.m4a","audio-host/quiz/fs_107.m4a","audio-host/quiz/fs_11.m4a","audio-host/quiz/fs_110.m4a","audio-host/quiz/fs_113.m4a","audio-host/quiz/fs_116.m4a","audio-host/quiz/fs_119.m4a","audio-host/quiz/fs_122.m4a","audio-host/quiz/fs_125.m4a","audio-host/quiz/fs_128.m4a","audio-host/quiz/fs_131.m4a","audio-host/quiz/fs_134.m4a","audio-host/quiz/fs_137.m4a","audio-host/quiz/fs_14.m4a","audio-host/quiz/fs_140.m4a","audio-host/quiz/fs_143.m4a","audio-host/quiz/fs_146.m4a","audio-host/quiz/fs_149.m4a","audio-host/quiz/fs_152.m4a","audio-host/quiz/fs_155.m4a","audio-host/quiz/fs_158.m4a","audio-host/quiz/fs_161.m4a","audio-host/quiz/fs_164.m4a","audio-host/quiz/fs_167.m4a","audio-host/quiz/fs_17.m4a","audio-host/quiz/fs_170.m4a","audio-host/quiz/fs_173.m4a","audio-host/quiz/fs_176.m4a","audio-host/quiz/fs_179.m4a","audio-host/quiz/fs_182.m4a","audio-host/quiz/fs_185.m4a","audio-host/quiz/fs_188.m4a","audio-host/quiz/fs_191.m4a","audio-host/quiz/fs_194.m4a","audio-host/quiz/fs_197.m4a","audio-host/quiz/fs_2.m4a","audio-host/quiz/fs_20.m4a","audio-host/quiz/fs_200.m4a","audio-host/quiz/fs_23.m4a","audio-host/quiz/fs_26.m4a","audio-host/quiz/fs_29.m4a","audio-host/quiz/fs_32.m4a","audio-host/quiz/fs_35.m4a","audio-host/quiz/fs_38.m4a","audio-host/quiz/fs_41.m4a","audio-host/quiz/fs_44.m4a","audio-host/quiz/fs_47.m4a","audio-host/quiz/fs_5.m4a","audio-host/quiz/fs_50.m4a","audio-host/quiz/fs_53.m4a","audio-host/quiz/fs_56.m4a","audio-host/quiz/fs_59.m4a","audio-host/quiz/fs_62.m4a","audio-host/quiz/fs_65.m4a","audio-host/quiz/fs_68.m4a","audio-host/quiz/fs_71.m4a","audio-host/quiz/fs_74.m4a","audio-host/quiz/fs_77.m4a","audio-host/quiz/fs_8.m4a","audio-host/quiz/fs_80.m4a","audio-host/quiz/fs_83.m4a","audio-host/quiz/fs_86.m4a","audio-host/quiz/fs_89.m4a","audio-host/quiz/fs_92.m4a","audio-host/quiz/fs_95.m4a","audio-host/quiz/fs_98.m4a","audio-host/quiz/lc_1.m4a","audio-host/quiz/lc_10.m4a","audio-host/quiz/lc_100.m4a","audio-host/quiz/lc_103.m4a","audio-host/quiz/lc_106.m4a","audio-host/quiz/lc_109.m4a","audio-host/quiz/lc_112.m4a","audio-host/quiz/lc_115.m4a","audio-host/quiz/lc_118.m4a","audio-host/quiz/lc_121.m4a","audio-host/quiz/lc_124.m4a","audio-host/quiz/lc_127.m4a","audio-host/quiz/lc_13.m4a","audio-host/quiz/lc_130.m4a","audio-host/quiz/lc_133.m4a","audio-host/quiz/lc_136.m4a","audio-host/quiz/lc_139.m4a","audio-host/quiz/lc_142.m4a","audio-host/quiz/lc_145.m4a","audio-host/quiz/lc_148.m4a","audio-host/quiz/lc_151.m4a","audio-host/quiz/lc_154.m4a","audio-host/quiz/lc_157.m4a","audio-host/quiz/lc_16.m4a","audio-host/quiz/lc_160.m4a","audio-host/quiz/lc_163.m4a","audio-host/quiz/lc_166.m4a","audio-host/quiz/lc_169.m4a","audio-host/quiz/lc_172.m4a","audio-host/quiz/lc_175.m4a","audio-host/quiz/lc_178.m4a","audio-host/quiz/lc_181.m4a","audio-host/quiz/lc_184.m4a","audio-host/quiz/lc_187.m4a","audio-host/quiz/lc_19.m4a","audio-host/quiz/lc_190.m4a","audio-host/quiz/lc_193.m4a","audio-host/quiz/lc_196.m4a","audio-host/quiz/lc_199.m4a","audio-host/quiz/lc_22.m4a","audio-host/quiz/lc_25.m4a","audio-host/quiz/lc_28.m4a","audio-host/quiz/lc_31.m4a","audio-host/quiz/lc_34.m4a","audio-host/quiz/lc_37.m4a","audio-host/quiz/lc_4.m4a","audio-host/quiz/lc_40.m4a","audio-host/quiz/lc_43.m4a","audio-host/quiz/lc_46.m4a","audio-host/quiz/lc_49.m4a","audio-host/quiz/lc_52.m4a","audio-host/quiz/lc_55.m4a","audio-host/quiz/lc_58.m4a","audio-host/quiz/lc_61.m4a","audio-host/quiz/lc_64.m4a","audio-host/quiz/lc_67.m4a","audio-host/quiz/lc_7.m4a","audio-host/quiz/lc_70.m4a","audio-host/quiz/lc_73.m4a","audio-host/quiz/lc_76.m4a","audio-host/quiz/lc_79.m4a","audio-host/quiz/lc_82.m4a","audio-host/quiz/lc_85.m4a","audio-host/quiz/lc_88.m4a","audio-host/quiz/lc_91.m4a","audio-host/quiz/lc_94.m4a","audio-host/quiz/lc_97.m4a","audio-host/quiz/mt_102.m4a","audio-host/quiz/mt_105.m4a","audio-host/quiz/mt_108.m4a","audio-host/quiz/mt_111.m4a","audio-host/quiz/mt_114.m4a","audio-host/quiz/mt_117.m4a","audio-host/quiz/mt_12.m4a","audio-host/quiz/mt_120.m4a","audio-host/quiz/mt_123.m4a","audio-host/quiz/mt_126.m4a","audio-host/quiz/mt_129.m4a","audio-host/quiz/mt_132.m4a","audio-host/quiz/mt_135.m4a","audio-host/quiz/mt_138.m4a","audio-host/quiz/mt_141.m4a","audio-host/quiz/mt_144.m4a","audio-host/quiz/mt_147.m4a","audio-host/quiz/mt_15.m4a","audio-host/quiz/mt_150.m4a","audio-host/quiz/mt_153.m4a","audio-host/quiz/mt_156.m4a","audio-host/quiz/mt_159.m4a","audio-host/quiz/mt_162.m4a","audio-host/quiz/mt_165.m4a","audio-host/quiz/mt_168.m4a","audio-host/quiz/mt_171.m4a","audio-host/quiz/mt_174.m4a","audio-host/quiz/mt_177.m4a","audio-host/quiz/mt_18.m4a","audio-host/quiz/mt_180.m4a","audio-host/quiz/mt_183.m4a","audio-host/quiz/mt_186.m4a","audio-host/quiz/mt_189.m4a","audio-host/quiz/mt_192.m4a","audio-host/quiz/mt_195.m4a","audio-host/quiz/mt_198.m4a","audio-host/quiz/mt_201.m4a","audio-host/quiz/mt_21.m4a","audio-host/quiz/mt_24.m4a","audio-host/quiz/mt_27.m4a","audio-host/quiz/mt_3.m4a","audio-host/quiz/mt_30.m4a","audio-host/quiz/mt_33.m4a","audio-host/quiz/mt_36.m4a","audio-host/quiz/mt_39.m4a","audio-host/quiz/mt_42.m4a","audio-host/quiz/mt_45.m4a","audio-host/quiz/mt_48.m4a","audio-host/quiz/mt_51.m4a","audio-host/quiz/mt_54.m4a","audio-host/quiz/mt_57.m4a","audio-host/quiz/mt_6.m4a","audio-host/quiz/mt_60.m4a","audio-host/quiz/mt_63.m4a","audio-host/quiz/mt_66.m4a","audio-host/quiz/mt_69.m4a","audio-host/quiz/mt_72.m4a","audio-host/quiz/mt_75.m4a","audio-host/quiz/mt_78.m4a","audio-host/quiz/mt_81.m4a","audio-host/quiz/mt_84.m4a","audio-host/quiz/mt_87.m4a","audio-host/quiz/mt_9.m4a","audio-host/quiz/mt_90.m4a","audio-host/quiz/mt_93.m4a","audio-host/quiz/mt_96.m4a","audio-host/quiz/mt_99.m4a","audio-host/quiz/rj_235.m4a","audio-host/quiz/rj_236.m4a","audio-host/quiz/rj_237.m4a","audio-host/quiz/rj_238.m4a","audio-host/quiz/rj_239.m4a","audio-host/quiz/rj_240.m4a","audio-host/quiz/rj_241.m4a","audio-host/quiz/rj_242.m4a","audio-host/quiz/rj_243.m4a","audio-host/quiz/rj_244.m4a","audio-host/quiz/rj_245.m4a","audio-host/quiz/rj_246.m4a","audio-host/quiz/rp_202.m4a","audio-host/quiz/rp_203.m4a","audio-host/quiz/rp_204.m4a","audio-host/quiz/rp_205.m4a","audio-host/quiz/rp_206.m4a","audio-host/quiz/rp_207.m4a","audio-host/quiz/rp_208.m4a","audio-host/quiz/rp_209.m4a","audio-host/quiz/rp_210.m4a","audio-host/quiz/rp_211.m4a","audio-host/quiz/rp_212.m4a","audio-host/quiz/rp_213.m4a","audio-host/quiz/rp_214.m4a","audio-host/quiz/rp_215.m4a","audio-host/quiz/rp_216.m4a","audio-host/quiz/rp_217.m4a","audio-host/quiz/rp_218.m4a","audio-host/quiz/rp_219.m4a","audio-host/quiz/rq_257.m4a","audio-host/quiz/rq_258.m4a","audio-host/quiz/rq_259.m4a","audio-host/quiz/rq_260.m4a","audio-host/quiz/rq_261.m4a","audio-host/quiz/rs_220.m4a","audio-host/quiz/rs_221.m4a","audio-host/quiz/rs_222.m4a","audio-host/quiz/rs_223.m4a","audio-host/quiz/rs_224.m4a","audio-host/quiz/rs_225.m4a","audio-host/quiz/rs_226.m4a","audio-host/quiz/rs_227.m4a","audio-host/quiz/rs_228.m4a","audio-host/quiz/rs_229.m4a","audio-host/quiz/rs_230.m4a","audio-host/quiz/rs_231.m4a","audio-host/quiz/rs_232.m4a","audio-host/quiz/rs_233.m4a","audio-host/quiz/rs_234.m4a","audio-host/quiz/rt_247.m4a","audio-host/quiz/rt_248.m4a","audio-host/quiz/rt_249.m4a","audio-host/quiz/rt_250.m4a","audio-host/quiz/rt_251.m4a","audio-host/quiz/rt_252.m4a","audio-host/quiz/rt_253.m4a","audio-host/quiz/rt_254.m4a","audio-host/quiz/rt_255.m4a","audio-host/quiz/rt_256.m4a","audio-host/tone/formula.m4a","audio-host/word/a.m4a","audio-host/word/a1.m4a","audio-host/word/a2.m4a","audio-host/word/a3.m4a","audio-host/word/a4.m4a","audio-host/word/ai.m4a","audio-host/word/an.m4a","audio-host/word/ang.m4a","audio-host/word/ao.m4a","audio-host/word/b.m4a","audio-host/word/ba.m4a","audio-host/word/c.m4a","audio-host/word/ch.m4a","audio-host/word/chi.m4a","audio-host/word/chuan.m4a","audio-host/word/ci.m4a","audio-host/word/d.m4a","audio-host/word/e.m4a","audio-host/word/ei.m4a","audio-host/word/en.m4a","audio-host/word/eng.m4a","audio-host/word/er.m4a","audio-host/word/f.m4a","audio-host/word/g.m4a","audio-host/word/gua.m4a","audio-host/word/h.m4a","audio-host/word/hao.m4a","audio-host/word/huo.m4a","audio-host/word/i.m4a","audio-host/word/ie.m4a","audio-host/word/in.m4a","audio-host/word/ing.m4a","audio-host/word/iu.m4a","audio-host/word/j.m4a","audio-host/word/ju.m4a","audio-host/word/k.m4a","audio-host/word/l.m4a","audio-host/word/m.m4a","audio-host/word/ma.m4a","audio-host/word/n.m4a","audio-host/word/niao.m4a","audio-host/word/o.m4a","audio-host/word/ong.m4a","audio-host/word/ou.m4a","audio-host/word/p.m4a","audio-host/word/q.m4a","audio-host/word/qu.m4a","audio-host/word/quan.m4a","audio-host/word/r.m4a","audio-host/word/ri.m4a","audio-host/word/s.m4a","audio-host/word/sh.m4a","audio-host/word/shi.m4a","audio-host/word/shui.m4a","audio-host/word/si.m4a","audio-host/word/t.m4a","audio-host/word/u.m4a","audio-host/word/ui.m4a","audio-host/word/un.m4a","audio-host/word/v.m4a","audio-host/word/ve.m4a","audio-host/word/vn.m4a","audio-host/word/w.m4a","audio-host/word/wu.m4a","audio-host/word/x.m4a","audio-host/word/xu.m4a","audio-host/word/xue.m4a","audio-host/word/y.m4a","audio-host/word/ye.m4a","audio-host/word/yi.m4a","audio-host/word/yin.m4a","audio-host/word/ying.m4a","audio-host/word/yu.m4a","audio-host/word/yuan.m4a","audio-host/word/yue.m4a","audio-host/word/yun.m4a","audio-host/word/z.m4a","audio-host/word/zh.m4a","audio-host/word/zhi.m4a","audio-host/word/zi.m4a","spell-audio/a1.m4a","spell-audio/a2.m4a","spell-audio/a3.m4a","spell-audio/a4.m4a","spell-audio/ai4.m4a","spell-audio/an1.m4a","spell-audio/ba1.m4a","spell-audio/ba4.m4a","spell-audio/bai2.m4a","spell-audio/bang1.m4a","spell-audio/cao3.m4a","spell-audio/chi1.m4a","spell-audio/chong2.m4a","spell-audio/ci2.m4a","spell-audio/da4.m4a","spell-audio/deng1.m4a","spell-audio/di4.m4a","spell-audio/duo1.m4a","spell-audio/e2.m4a","spell-audio/er3.m4a","spell-audio/er4.m4a","spell-audio/fei1.m4a","spell-audio/feng1.m4a","spell-audio/ge1.m4a","spell-audio/gua1.m4a","spell-audio/guo3.m4a","spell-audio/hao3.m4a","spell-audio/he1.m4a","spell-audio/he2.m4a","spell-audio/hong2.m4a","spell-audio/hua1.m4a","spell-audio/huang2.m4a","spell-audio/huo3.m4a","spell-audio/ji1.m4a","spell-audio/jie3.m4a","spell-audio/jiu3.m4a","spell-audio/ju1.m4a","spell-audio/ju2.m4a","spell-audio/jue2.m4a","spell-audio/jun1.m4a","spell-audio/ke1.m4a","spell-audio/kou3.m4a","spell-audio/lei4.m4a","spell-audio/li2.m4a","spell-audio/liu4.m4a","spell-audio/ma1.m4a","spell-audio/ma2.m4a","spell-audio/ma3.m4a","spell-audio/ma4.m4a","spell-audio/mao1.m4a","spell-audio/mei4.m4a","spell-audio/men2.m4a","spell-audio/mi3.m4a","spell-audio/mu4.m4a","spell-audio/nai3.m4a","spell-audio/ni3.m4a","spell-audio/niao3.m4a","spell-audio/niu2.m4a","spell-audio/ou3.m4a","spell-audio/po2.m4a","spell-audio/qi1.m4a","spell-audio/qu4.m4a","spell-audio/que4.m4a","spell-audio/qun2.m4a","spell-audio/ren2.m4a","spell-audio/ri4.m4a","spell-audio/san1.m4a","spell-audio/shan1.m4a","spell-audio/shang4.m4a","spell-audio/shao3.m4a","spell-audio/shi2.m4a","spell-audio/shou3.m4a","spell-audio/shu1.m4a","spell-audio/shui3.m4a","spell-audio/si4.m4a","spell-audio/ta1.m4a","spell-audio/tian1.m4a","spell-audio/tian2.m4a","spell-audio/tu4.m4a","spell-audio/wen1.m4a","spell-audio/wo3.m4a","spell-audio/wu1.m4a","spell-audio/wu3.m4a","spell-audio/xi1.m4a","spell-audio/xia4.m4a","spell-audio/xiao3.m4a","spell-audio/xing1.m4a","spell-audio/xu1.m4a","spell-audio/xue2.m4a","spell-audio/xue3.m4a","spell-audio/xun2.m4a","spell-audio/yang2.m4a","spell-audio/ye4.m4a","spell-audio/yi1.m4a","spell-audio/yin1.m4a","spell-audio/ying1.m4a","spell-audio/you3.m4a","spell-audio/yu2.m4a","spell-audio/yu3.m4a","spell-audio/yu4.m4a","spell-audio/yuan2.m4a","spell-audio/yue4.m4a","spell-audio/yun2.m4a","spell-audio/zhan4.m4a","spell-audio/zhi1.m4a","spell-audio/zhu1.m4a","spell-audio/zi4.m4a","spell-audio/zu2.m4a","spell-audio/zuo4.m4a"];
+
+var GROUPS = [
+  { key: 'audio-host/quiz',   label: '题目发音',   desc: '389 道题的题干音频' },
+  { key: 'audio-host/pinyin', label: '拼音字母',   desc: '声母 / 韵母 / 整体认读' },
+  { key: 'audio-host/word',   label: '示例词',     desc: '例字与例词发音' },
+  { key: 'audio-host/tone',   label: '声调口诀',   desc: '声调示范' },
+  { key: 'audio-host/fx',     label: '音效',       desc: '答对 / 再试一次' },
+  { key: 'audio-host/guide',  label: '引导音',     desc: '点击开始提示' },
+  { key: 'spell-audio',       label: '分解拼读',   desc: '声母—韵母—完整音节三段示范' }
+];
+
+var state = { group: 'all', keyword: '', checks: {} };
+
+function groupOf(path) {
+  var parts = path.split('/');
+  return parts.length > 2 ? parts[0] + '/' + parts[1] : parts[0];
+}
+function absUrl(path) { return new URL(path, location.href).href; }
+function esc(s) {
+  return String(s).replace(/[&<>"']/g, function (c) {
+    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+  });
+}
+
+/* ---------- 统计 ---------- */
+function renderStats() {
+  var host = location.origin + location.pathname.replace(/index\.html$/, '');
+  var cards = [
+    { n: AUDIO_FILES.length, t: '音频总数（M4A）' },
+    { n: GROUPS.length, t: '资源分组' },
+    { n: AUDIO_FILES.filter(function (p) { return p.indexOf('spell-audio/') === 0; }).length, t: '分解拼读音频' },
+    { n: '0 重定向', t: 'Pages 直链特性' }
+  ];
+  document.getElementById('stats').innerHTML = cards.map(function (c) {
+    return '<div class="stat"><b>' + c.n + '</b><span>' + c.t + '</span></div>';
+  }).join('');
+  document.getElementById('footCount').textContent = AUDIO_FILES.length;
+  window.__base = host;
+}
+
+/* ---------- 筛选 chips ---------- */
+function renderChips() {
+  var html = '<div class="chip' + (state.group === 'all' ? ' on' : '') + '" data-g="all">全部<i>' + AUDIO_FILES.length + '</i></div>';
+  GROUPS.forEach(function (g) {
+    var n = AUDIO_FILES.filter(function (p) { return groupOf(p) === g.key; }).length;
+    if (!n) return;
+    html += '<div class="chip' + (state.group === g.key ? ' on' : '') + '" data-g="' + g.key + '">' +
+            g.label + '<i>' + n + '</i></div>';
+  });
+  var box = document.getElementById('chips');
+  box.innerHTML = html;
+  Array.prototype.forEach.call(box.querySelectorAll('.chip'), function (el) {
+    el.addEventListener('click', function () {
+      state.group = el.getAttribute('data-g');
+      renderChips(); renderGroups();
+    });
+  });
+}
+
+/* ---------- 当前筛选结果 ---------- */
+function filtered() {
+  var kw = state.keyword.trim().toLowerCase();
+  return AUDIO_FILES.filter(function (p) {
+    if (state.group !== 'all' && groupOf(p) !== state.group) return false;
+    if (kw && p.toLowerCase().indexOf(kw) < 0) return false;
+    return true;
+  });
+}
+
+/* ---------- 分组列表 ---------- */
+function renderGroups() {
+  var list = filtered();
+  var box = document.getElementById('groups');
+  if (!list.length) { box.innerHTML = '<div class="panel empty">没有匹配的音频，换个关键词试试</div>'; return; }
+  var byGroup = {};
+  list.forEach(function (p) { (byGroup[groupOf(p)] = byGroup[groupOf(p)] || []).push(p); });
+  var html = '';
+  GROUPS.forEach(function (g) {
+    var arr = (byGroup[g.key] || []).sort();
+    if (!arr.length) return;
+    var open = (state.keyword || state.group !== 'all' || arr.length <= 20) ? ' open' : '';
+    html += '<details class="group"' + open + ' data-g="' + g.key + '">' +
+      '<summary><span class="arrow">▶</span><span>' + g.label + '</span>' +
+      '<span style="color:var(--muted);font-weight:400;font-size:12px">' + g.desc + '</span>' +
+      '<span class="count">' + arr.length + ' 条</span></summary><div class="rows">';
+    arr.forEach(function (p) {
+      var name = p.split('/').pop();
+      var st = state.checks[p];
+      var stCls = st === 'ok' ? ' ok' : (st === 'err' ? ' err' : '');
+      var stTxt = st === 'ok' ? '200' : (st === 'err' ? '失败' : '');
+      html += '<div class="row" data-p="' + esc(p) + '">' +
+        '<button class="play" title="播放">▶</button>' +
+        '<span class="name">' + esc(name) + '</span>' +
+        '<span class="state' + stCls + '">' + stTxt + '</span>' +
+        '<button class="copy">复制链接</button></div>';
+    });
+    html += '</div></details>';
+  });
+  box.innerHTML = html;
+
+  Array.prototype.forEach.call(box.querySelectorAll('.row'), function (row) {
+    var p = row.getAttribute('data-p');
+    row.querySelector('.play').addEventListener('click', function () { play(p); });
+    row.querySelector('.copy').addEventListener('click', function () { copy(absUrl(p), this); });
+  });
+}
+
+/* ---------- 播放 ---------- */
+function play(path) {
+  var url = absUrl(path);
+  var a = document.getElementById('audio');
+  a.src = url;
+  document.getElementById('nowName').textContent = path.split('/').pop();
+  document.getElementById('nowUrl').textContent = url;
+  document.getElementById('player').style.display = 'block';
+  a.play().catch(function () {});
+}
+document.getElementById('closeBtn').addEventListener('click', function () {
+  var a = document.getElementById('audio');
+  a.pause(); a.removeAttribute('src'); a.load();
+  document.getElementById('player').style.display = 'none';
+});
+
+/* ---------- 复制 ---------- */
+function copy(text, btn) {
+  var done = function () {
+    if (!btn) return;
+    var old = btn.textContent; btn.textContent = '已复制 ✓';
+    setTimeout(function () { btn.textContent = old; }, 1200);
+  };
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(done, function () { fallback(text, done); });
+  } else fallback(text, done);
+}
+function fallback(text, done) {
+  var ta = document.createElement('textarea');
+  ta.value = text; document.body.appendChild(ta); ta.select();
+  try { document.execCommand('copy'); done(); } catch (e) {}
+  document.body.removeChild(ta);
+}
+document.getElementById('copyAllBtn').addEventListener('click', function () {
+  var urls = filtered().map(absUrl).join('\n');
+  copy(urls, this);
+});
+
+/* ---------- 连通性自检（同源 HEAD 请求，并发 8） ---------- */
+var checking = false;
+document.getElementById('checkBtn').addEventListener('click', function () {
+  if (checking) return;
+  var list = filtered().slice();
+  if (!list.length) return;
+  checking = true;
+  var btn = this; btn.disabled = true; btn.textContent = '自检中…';
+  var bar = document.getElementById('checkbar'); bar.style.display = 'flex';
+  var fill = document.getElementById('progressBar'); fill.style.width = '0%';
+  var msg = document.getElementById('checkMsg');
+  var done = 0, ok = 0, err = 0, idx = 0;
+  var failed = [];
+
+  function update() {
+    fill.style.width = (done / list.length * 100).toFixed(1) + '%';
+    msg.innerHTML = '已检 ' + done + '/' + list.length +
+      ' · <span class="ok">正常 ' + ok + '</span> · <span class="err">失败 ' + err + '</span>';
+  }
+  function finish() {
+    checking = false; btn.disabled = false; btn.textContent = '一键自检当前列表';
+    if (failed.length) {
+      msg.innerHTML += ' <span title="' + esc(failed.join(', ')) + '">（悬停查看失败项）</span>';
+    }
+    renderGroups();
+  }
+  function worker() {
+    if (idx >= list.length) { if (done === list.length) finish(); return; }
+    var p = list[idx++];
+    fetch(absUrl(p), { method: 'HEAD', cache: 'no-store' })
+      .then(function (r) { if (r.ok) { ok++; state.checks[p] = 'ok'; } else { err++; state.checks[p] = 'err'; failed.push(p); } })
+      .catch(function () { err++; state.checks[p] = 'err'; failed.push(p); })
+      .then(function () { done++; update(); worker(); });
+  }
+  update();
+  for (var i = 0; i < 8; i++) worker();
+});
+
+/* ---------- 初始化 ---------- */
+document.getElementById('search').addEventListener('input', function (e) {
+  state.keyword = e.target.value; renderGroups();
+});
+renderStats();
+renderChips();
+renderGroups();
+</script>
+</body>
+</html>
